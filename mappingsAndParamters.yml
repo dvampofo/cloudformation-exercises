@@ -1,0 +1,35 @@
+Mappings: 
+  AmiRegionMap: 
+    us-east-1:
+      AMI: ami-07761f3ae34c4478d
+    us-east-2:
+      AMI: ami-0c7f9161f8491665f
+    us-west-1:
+      AMI: ami-02cc6142066a5587f
+Resources:
+  MyInstance:
+   Type: AWS::EC2::Instance
+   Properties:
+    InstanceType: t2.micro
+    ImageId: !FindInMap 
+      - AmiRegionMap
+      - !Ref AWS::Region
+      - AMI
+    Tags:
+     - Key: "Name"
+       Value: !Join ["-", [Lets, See, ChangeSet]]
+    SecurityGroups:
+     - !Ref ClFrmSG
+  ClFrmSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+        GroupDescription: Allow ssh & http from MyIP
+        SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 183.83.39.124/32
