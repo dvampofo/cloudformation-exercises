@@ -1,0 +1,55 @@
+Parameters:
+  NameOfService:
+    Description: "The name of the service this stack is to be used for"
+    Type: String
+  InstanceTypeParameter:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+    Description: Enter t2.micro, t2.small, or t2.medium
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of EC2 KeyPair
+Mappings: 
+  AmiRegionMap: 
+    us-east-1:
+      AMI: ami-07761f3ae34c4478d
+    us-east-2:
+      AMI: ami-0c7f9161f8491665f
+    us-west-1:
+      AMI: ami-02cc6142066a5587f
+Resources:
+  MyInstance:
+   Type: AWS::EC2::Instance
+   Properties:
+    InstanceType: !Ref InstanceTypeParameter
+    KeyName: !Ref KeyName 
+    ImageId: !FindInMap
+      - AmiRegionMap
+      - !Ref AWS::Region
+      - AMI
+    Tags:
+     - Key: "Name"
+       Value: NameOfService
+    SecurityGroups:
+     - !Ref ClFrmSG
+  ClFrmSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+        GroupDescription: Allow ssh & http from MyIP
+        SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 183.83.39.124/32
+
+Outputs:
+  PrintSomeInfo:
+    Value: !GetAtt MyInstance.PublicDnsName
